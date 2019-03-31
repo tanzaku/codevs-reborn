@@ -24,9 +24,9 @@ impl Action {
 
 impl From<u8> for Action {
     fn from(item: u8) -> Self {
-        if item == 8 * 4 {
+        if item == 9 * 4 {
             Action::UseSkill
-        } else if item < 8 * 4 {
+        } else if item < 9 * 4 {
             let pos = (item / 4) as usize;
             let rot = (item % 4) as usize;
             Action::PutBlock { pos, rot }

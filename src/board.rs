@@ -10,39 +10,40 @@ const W: i32 = 11;
 const H: i32 = DEAD_LINE_Y + 3;
 const DIRS: [i32; 4] = [1, 1 + W, W, W-1];
 const VANISH: u8 = 10;
+const OBSTACLE: u8 = VANISH + 1;
 
-struct Cookie<T> {
-    data: Vec<T>,
-    id: Vec<u32>,
-    gid: u32,
-}
+// struct Cookie<T> {
+//     data: Vec<T>,
+//     id: Vec<u32>,
+//     gid: u32,
+// }
 
-impl<T> Cookie<T> where T: Clone + Default {
-    pub fn new(capacity: usize) -> Self {
-        Self {
-            data: vec![Default::default(); capacity],
-            id: vec![0; capacity],
-            gid: 0,
-        }
-    }
+// impl<T> Cookie<T> where T: Clone + Default {
+//     pub fn new(capacity: usize) -> Self {
+//         Self {
+//             data: vec![Default::default(); capacity],
+//             id: vec![0; capacity],
+//             gid: 0,
+//         }
+//     }
 
-    pub fn get(&self, i: usize) -> T {
-        if self.id[i] == self.gid {
-            self.data[i].clone()
-        } else {
-            Default::default()
-        }
-    }
+//     pub fn get(&self, i: usize) -> T {
+//         if self.id[i] == self.gid {
+//             self.data[i].clone()
+//         } else {
+//             Default::default()
+//         }
+//     }
 
-    pub fn set(&mut self, i: usize, v: T) {
-        self.id[i] = self.gid;
-        self.data[i] = v;
-    }
+//     pub fn set(&mut self, i: usize, v: T) {
+//         self.id[i] = self.gid;
+//         self.data[i] = v;
+//     }
 
-    pub fn clear(&mut self) {
-        self.gid += 1;
-    }
-}
+//     pub fn clear(&mut self) {
+//         self.gid += 1;
+//     }
+// }
 
 #[derive(Clone)]
 pub struct Board {
@@ -71,6 +72,26 @@ impl Board {
         Self {
             board: b,
             height: [0; W as usize],
+        }
+    }
+
+    pub fn from_board(board: [u8; ((W-1) * (H-3)) as usize]) -> Self {
+        let mut b = [0; (W * H) as usize];
+        let mut h = [0; W as usize];
+        for y in 0..H {
+            b[(y*W+W-1) as usize] = VANISH;
+        }
+        for y in 0..H-3 {
+            for x in 0..W-1 {
+                b[(y*W+x) as usize] = board[((H-3-1-y)*(W-1)+x) as usize];
+                if b[(y*W+x) as usize] != 0 {
+                    h[x as usize] = (y + 1) as u8;
+                }
+            }
+        }
+        Self {
+            board: b,
+            height: h,
         }
     }
 
@@ -137,6 +158,17 @@ impl Board {
                 }
             }
             self.height[x as usize] = h as u8;
+        }
+    }
+
+    pub fn fall_obstacle(&mut self) {
+        if self.is_dead() {
+            return;
+        }
+        for x in 0..W-1 {
+            let y = self.height[x as usize] as i32;
+            self[(x,y)] = OBSTACLE;
+            self.height[x as usize] += 1;
         }
     }
 
@@ -225,4 +257,13 @@ fn board_test_vanish() {
     assert_eq!(board[(8,1)], 0);
     assert_eq!(board[(9,1)], 0);
     assert_eq!(rensa, 1);
+}
+
+#[test]
+fn board_test_vanish2() {
+    let mut board = Board::new();
+    let rensa = board.put(&[[2,0],[5,2]], 1, 0);
+    assert_eq!(board.max_height(), 2);
+    let rensa = board.put(&[[1,0],[5,6]], 1, 0);
+    assert_eq!(board.max_height(), 4);
 }
