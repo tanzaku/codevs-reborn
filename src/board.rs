@@ -5,8 +5,9 @@ use std::ops::{Index,IndexMut};
 use std::collections::HashSet;
 
 
+const DEAD_LINE_Y: i32 = 16;
 const W: i32 = 11;
-const H: i32 = 16;
+const H: i32 = DEAD_LINE_Y + 3;
 const DIRS: [i32; 4] = [1, 1 + W, W, W-1];
 const VANISH: u8 = 10;
 
@@ -43,15 +44,16 @@ impl<T> Cookie<T> where T: Clone + Default {
     }
 }
 
+#[derive(Clone)]
 pub struct Board {
     // column: [u64; W],
     board: [u8; (W * H) as usize],
     height: [u8; W as usize],
 }
 
-fn rotate(pattern: [[u8; 2]; 2], rot: usize) -> [[u8; 2]; 2] {
+fn rotate(pattern: &[[u8; 2]; 2], rot: usize) -> [[u8; 2]; 2] {
     let mut rot = rot;
-    let mut pattern = pattern;
+    let mut pattern = pattern.clone();
     while rot > 0 {
         pattern = [[pattern[1][0], pattern[0][0]],
                     [pattern[1][1], pattern[0][1]]];
@@ -76,7 +78,7 @@ impl Board {
         self.height[x] as usize * W as usize + x
     }
 
-    pub fn put(&mut self, pattern: [[u8; 2]; 2], pos: usize, rot: usize) -> u8 {
+    pub fn put(&mut self, pattern: &[[u8; 2]; 2], pos: usize, rot: usize) -> u8 {
         assert!(pos + pattern.len() <= W as usize);
         let pattern = rotate(pattern, rot);
         let mut dh = [0; 2];
@@ -98,33 +100,14 @@ impl Board {
         let mut rensa = 0;
         loop {
             let mut set = HashSet::new();
-            for x in 0..W {
+            for x in 0..W-1 {
                 for y in 0..self.height[x as usize] as i32 {
                     for d in DIRS.iter() {
-                        let mut l = y * W + x;
-                        let mut r = l;
-                        let mut sum = 0;
-                        'outer: loop {
-                            while sum < VANISH {
-                                // eprintln!("{} {} {} {} {}", l, r, d, self[r], sum);
-                                if self[r] == 0 || self[r] > VANISH {
-                                    break 'outer;
-                                }
-                                sum += self[r];
-                                r += d;
-                            }
-
-                            if sum == VANISH {
-                                let mut cur = l;
-                                while cur != r {
-                                    set.insert(cur);
-                                    cur += d;
-                                }
-                            }
-                            while sum >= VANISH {
-                                sum -= self[l];
-                                l += d;
-                            }
+                        let l = y * W + x;
+                        let r = l + d;
+                        if self[l] + self[r] == VANISH {
+                            set.insert(l);
+                            set.insert(r);
                         }
                     }
                 }
@@ -142,7 +125,7 @@ impl Board {
     }
 
     fn fall_down(&mut self) {
-        for x in 0..W {
+        for x in 0..W-1 {
             let mut h = 0;
             for y in 0..self.height[x as usize] as i32 {
                 if y != h {
@@ -155,6 +138,14 @@ impl Board {
             }
             self.height[x as usize] = h as u8;
         }
+    }
+
+    pub fn is_dead(&self) -> bool {
+        *self.height.iter().max().unwrap() as i32 > DEAD_LINE_Y
+    }
+
+    pub fn max_height(&self) -> u8 {
+        *self.height.iter().max().unwrap()
     }
 }
 
@@ -177,6 +168,10 @@ impl Index<i32> for Board {
     type Output = u8;
 
     fn index(&self, ix: i32) -> &Self::Output {
+        // if ix as usize >= self.board.len() {
+        //     eprintln!("{:?}", self);
+        //     eprintln!("max height: {}", self.height.iter().max().unwrap());
+        // }
         &self.board[ix as usize]
     }
 }
@@ -202,10 +197,16 @@ impl IndexMut<(i32,i32)> for Board {
     }
 }
 
+impl Default for Board {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[test]
 fn board_test() {
     let mut board = Board::new();
-    let rensa = board.put([[9,5],[0,3]], 8, 3);
+    let rensa = board.put(&[[9,5],[0,3]], 8, 3);
     // eprintln!("{:?}", board);
     assert_eq!(board[(8,0)], 9);
     assert_eq!(board[(9,0)], 3);
@@ -217,7 +218,7 @@ fn board_test() {
 #[test]
 fn board_test_vanish() {
     let mut board = Board::new();
-    let rensa = board.put([[9,5],[0,1]], 8, 3);
+    let rensa = board.put(&[[9,5],[0,1]], 8, 3);
     // eprintln!("{:?}", board);
     assert_eq!(board[(8,0)], 5);
     assert_eq!(board[(9,0)], 0);
