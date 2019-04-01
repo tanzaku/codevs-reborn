@@ -6,7 +6,12 @@ use std::convert::From;
 #[derive(Eq, PartialEq)]
 pub enum Action {
     PutBlock { pos: usize, rot: usize },
-    UseSkill
+    UseSkill,
+}
+
+pub struct ActionResult {
+    increase_obstacle_stock: i32,
+    decrease_skill_guage: i32,
 }
 
 impl Action {

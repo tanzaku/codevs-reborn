@@ -73,11 +73,15 @@ impl RensaPlan {
                             return;
                         }
                         let mut rensa_eval_board = board.clone();
-                        let rensa = rensa_eval_board.put(&fall, 0, 0) as i32;
-                        let score = rensa * 10000 + (self.rand.next() & 0xF) as i32 - board.max_height() as i32;
-                        let mut actions = b.actions.clone();
-                        actions.push(a.into());
+                        // let rensa = rensa_eval_board.put(&fall, 0, 0) as i32;
+                        // let score = rensa * 10000 + (self.rand.next() & 0xF) as i32 - board.max_height() as i32;
+                        // let mut actions = b.actions.clone();
+                        // actions.push(a.into());
+                        unsafe {
+                        let score = std::mem::uninitialized();
+                        let actions = std::mem::uninitialized();
                         next.push(BeamState::new(board, score, actions));
+                        }
                     }
                 });
             });
