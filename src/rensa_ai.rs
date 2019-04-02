@@ -10,6 +10,7 @@ use std::io::StdinLock;
 
 use super::action;
 use super::board;
+use super::player;
 use super::rensa_plan;
 
 const MAX_TURN: usize = 500;
@@ -19,9 +20,8 @@ pub struct RensaAi<'a> {
     stdin_lock: StdinLock<'a>,
     packs: Vec<[[u8; 2]; 2]>,
     prev_obstacle_stock: i32,
-    obstacle_stock: i32,
-    skill_guage: i32,
-    board: board::Board,
+    player: player::Player,
+    enemy: player::Player,
     rensa_plan: rensa_plan::RensaPlan,
 }
 
@@ -32,9 +32,8 @@ impl<'a> RensaAi<'a> {
             stdin_lock: lock,
             packs: Vec::new(),
             prev_obstacle_stock: 0,
-            obstacle_stock: 0,
-            skill_guage: 0,
-            board: board::Board::new(),
+            player: player::Player::new(board::Board::new(), 0, 0),
+            enemy: player::Player::new(board::Board::new(), 0, 0),
             rensa_plan: rensa_plan::RensaPlan::new(),
         }
     }
@@ -66,20 +65,20 @@ impl<'a> RensaAi<'a> {
     }
 
     fn read_turn_input(&mut self) {
-        self.prev_obstacle_stock = self.obstacle_stock;
+        self.prev_obstacle_stock = self.player.obstacle;
 
         self.cur_turn = self.read1();
         // eprintln!("start read {}", self.cur_turn);
         let rest_time_in_milli = self.read1::<u32>();
-        self.obstacle_stock = self.read1();
-        self.skill_guage = self.read1();
-        self.board = self.read_board();
+        self.player.obstacle = self.read1();
+        self.player.skill_guage = self.read1();
+        self.player.board = self.read_board();
         self.read1::<String>();
 
         let rest_time_in_milli = self.read1::<u32>();
-        let obstacle_stock = self.read1::<u32>();
-        let skill_guage = self.read1::<u32>();
-        self.read_board();
+        self.enemy.obstacle = self.read1();
+        self.enemy.skill_guage = self.read1();
+        self.enemy.board = self.read_board();
         self.read1::<String>();
     }
 
@@ -94,12 +93,7 @@ impl<'a> RensaAi<'a> {
             // eprintln!("height={}", self.board.max_height());
             // eprintln!("{:?}", self.board);
 
-            if let action::Action::PutBlock { pos, rot, } = act {
-                self.board.put(&self.packs[self.cur_turn], pos, rot);
-                // eprintln!("height={}", self.board.max_height());
-                // eprintln!("{:?}", self.board);
-                // eprintln!("is_dead={}", self.board.is_dead());
-            }
+            // self.player.put(&self.packs[self.cur_turn], &act);
             println!("{}", act);
             // assert!(self.cur_turn < 3);
         }
@@ -111,12 +105,12 @@ impl<'a> RensaAi<'a> {
     fn think(&mut self) -> action::Action {
         if !self.rensa_plan.exists() || self.new_obstscle() {
         // if !self.rensa_plan.exists() {
-            self.rensa_plan.calc_rensa_plan(self.cur_turn, &self.board, self.obstacle_stock);
+            self.rensa_plan.calc_rensa_plan(self.cur_turn, &self.player);
         }
         self.rensa_plan.replay()
     }
 
     fn new_obstscle(&self) -> bool {
-        self.obstacle_stock >= W && (self.prev_obstacle_stock - W) / W != self.obstacle_stock / W
+        self.player.obstacle >= W && (self.prev_obstacle_stock - W) / W != self.player.obstacle / W
     }
 }

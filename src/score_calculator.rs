@@ -42,12 +42,28 @@ impl ScoreCalculator {
         }
     }
 
-    pub fn calc_chain_result(chain: u8) -> action::ActionResult {
-        unimplemented!();
+    pub fn calc_chain_result(chains: u8) -> action::ActionResult {
+        SCORE_CALCULATOR.with(|s| {
+            let obstacle = s.chian_obstacle[chains as usize];
+            let skill_guage = Self::decrease_skill_guage(chains);
+            action::ActionResult::new(chains, obstacle, skill_guage)
+        })
     }
 
-    pub fn calc_bomb_result(bomb: u8, chain: u8) -> action::ActionResult {
-        unimplemented!();
+    pub fn calc_bomb_result(bomb: u8, chains: u8) -> action::ActionResult {
+        SCORE_CALCULATOR.with(|s| {
+            let obstacle = s.bomb_obstacle[bomb as usize] + s.chian_obstacle[chains as usize];
+            let skill_guage = Self::decrease_skill_guage(chains);
+            action::ActionResult::new(chains, obstacle, skill_guage)
+        })
+    }
+
+    fn decrease_skill_guage(chain: u8) -> i32 {
+        if chain < 3 {
+            0
+        } else {
+            12 + 2 * chain as i32
+        }
     }
 }
 
