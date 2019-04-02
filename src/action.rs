@@ -10,8 +10,9 @@ pub enum Action {
 }
 
 pub struct ActionResult {
-    increase_obstacle_stock: i32,
-    decrease_skill_guage: i32,
+    pub chains: u8,
+    pub obstacle: i32,
+    pub skill_guage: i32,
 }
 
 impl Action {
@@ -56,5 +57,12 @@ impl std::fmt::Display for Action {
             Action::PutBlock { pos, rot } => write!(f, "{} {}", pos, rot),
             Action::UseSkill => write!(f, "S"),
         }
+    }
+}
+
+
+impl ActionResult {
+    pub fn new(chains: u8, obstacle: i32, skill_guage: i32) -> Self {
+        Self { chains, obstacle, skill_guage, }
     }
 }
