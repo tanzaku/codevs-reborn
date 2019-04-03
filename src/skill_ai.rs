@@ -11,7 +11,7 @@ use std::io::StdinLock;
 use super::action;
 use super::board;
 use super::player;
-use super::rensa_plan;
+use super::skill_plan;
 
 const MAX_TURN: usize = 500;
 
@@ -22,7 +22,7 @@ pub struct RensaAi<'a> {
     prev_obstacle_stock: i32,
     player: player::Player,
     enemy: player::Player,
-    rensa_plan: rensa_plan::RensaPlan,
+    skill_plan: skill_plan::SkillPlan,
 }
 
 impl<'a> RensaAi<'a> {
@@ -34,7 +34,7 @@ impl<'a> RensaAi<'a> {
             prev_obstacle_stock: 0,
             player: player::Player::new(board::Board::new(), 0, 0),
             enemy: player::Player::new(board::Board::new(), 0, 0),
-            rensa_plan: rensa_plan::RensaPlan::new(),
+            skill_plan: skill_plan::SkillPlan::new(),
         }
     }
 
@@ -55,7 +55,7 @@ impl<'a> RensaAi<'a> {
             self.read1::<String>();
             self.packs.push([[v1, v2], [v3, v4]]);
         });
-        self.rensa_plan.set_pack(self.packs.clone());
+        self.skill_plan.set_pack(self.packs.clone());
     }
 
     fn read_board(&mut self) -> board::Board {
@@ -83,7 +83,7 @@ impl<'a> RensaAi<'a> {
     }
 
     pub fn exec(&mut self) {
-        println!("test-rensa-ai");
+        println!("test-skill-ai");
         self.read_game_input();
         loop {
             self.read_turn_input();
@@ -103,11 +103,11 @@ impl<'a> RensaAi<'a> {
     }
 
     fn think(&mut self) -> action::Action {
-        if !self.rensa_plan.can_replay(&self.player) || self.new_obstscle() {
-        // if !self.rensa_plan.exists() {
-            self.rensa_plan.calc_rensa_plan(self.cur_turn, &self.player);
+        if !self.skill_plan.can_replay(&self.player) || self.new_obstscle() {
+        // if !self.skill_plan.exists() {
+            self.skill_plan.calc_skill_plan(self.cur_turn, &self.player);
         }
-        self.rensa_plan.replay()
+        self.skill_plan.replay()
     }
 
     fn new_obstscle(&self) -> bool {

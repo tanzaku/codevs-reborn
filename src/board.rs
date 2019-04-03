@@ -4,11 +4,15 @@
 use std::ops::{Index,IndexMut};
 use std::collections::HashSet;
 
+use super::action;
+use super::score_calculator;
+
 
 const DEAD_LINE_Y: i32 = 16;
 const W: i32 = 11;
 const H: i32 = DEAD_LINE_Y + 3;
 const DIRS: [i32; 4] = [1, 1 + W, W, W-1];
+const DIRS9: [i32; 9] = [W+1, W, W-1, 1, 0, -1, -W+1, -W, -W-1];
 const VANISH: u8 = 10;
 const OBSTACLE: u8 = VANISH + 1;
 
@@ -99,7 +103,7 @@ impl Board {
         self.height[x] as usize * W as usize + x
     }
 
-    pub fn put(&mut self, pattern: &[[u8; 2]; 2], pos: usize, rot: usize) -> u8 {
+    pub fn put(&mut self, pattern: &[[u8; 2]; 2], pos: usize, rot: usize) -> action::ActionResult {
         assert!(pos + pattern.len() <= W as usize);
         let pattern = rotate(pattern, rot);
         let mut dh = [0; 2];
@@ -114,7 +118,29 @@ impl Board {
                 }
             }
         }
-        self.vanish()
+        let chains = self.vanish();
+        score_calculator::ScoreCalculator::calc_chain_result(chains)
+    }
+
+    pub fn use_skill(&mut self) -> action::ActionResult {
+        let mut set = HashSet::new();
+        for x in 0..W-1 {
+            for y in 0..self.height[x as usize] as i32 {
+                let p = y * W + x;
+                if self[p] != 5 {
+                    continue;
+                }
+                DIRS9.into_iter().filter(|d| self[p+*d] < VANISH).for_each(|d| { set.insert(p + d); });
+            }
+        }
+        if set.is_empty() {
+            return action::ActionResult::new(0, 0, 0);
+        }
+        set.iter().for_each(|p| { self[*p] = 0; });
+        self.fall_down();
+        let bombed_block = set.len() as u8;
+        let chains = self.vanish();
+        score_calculator::ScoreCalculator::calc_bomb_result(bombed_block, chains)
     }
 
     fn vanish(&mut self) -> u8 {
@@ -137,9 +163,7 @@ impl Board {
                 break;
             }
             rensa += 1;
-            set.into_iter().for_each(|p| {
-                self[p] = 0;
-            });
+            set.into_iter().for_each(|p| { self[p] = 0; });
             self.fall_down();
         }
         rensa
@@ -204,6 +228,9 @@ impl Index<i32> for Board {
         //     eprintln!("{:?}", self);
         //     eprintln!("max height: {}", self.height.iter().max().unwrap());
         // }
+        if ix < 0 || ix as usize >= self.board.len() {
+            return &OBSTACLE;
+        }
         &self.board[ix as usize]
     }
 }
@@ -235,6 +262,14 @@ impl Default for Board {
     }
 }
 
+impl PartialEq for Board {
+    fn eq(&self, other: &Self) -> bool {
+        self.board[..] == other.board[..]
+    }
+}
+
+impl Eq for Board {}
+
 #[test]
 fn board_test() {
     let mut board = Board::new();
@@ -244,7 +279,8 @@ fn board_test() {
     assert_eq!(board[(9,0)], 3);
     assert_eq!(board[(8,1)], 5);
     assert_eq!(board[(9,1)], 0);
-    assert_eq!(rensa, 0);
+    assert_eq!(rensa.obstacle, 0);
+    assert_eq!(rensa.skill_guage, 0);
 }
 
 #[test]
@@ -256,7 +292,8 @@ fn board_test_vanish() {
     assert_eq!(board[(9,0)], 0);
     assert_eq!(board[(8,1)], 0);
     assert_eq!(board[(9,1)], 0);
-    assert_eq!(rensa, 1);
+    assert_eq!(rensa.obstacle, 0);
+    assert_eq!(rensa.skill_guage, 0);
 }
 
 #[test]

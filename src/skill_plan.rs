@@ -35,13 +35,13 @@ impl PartialOrd for BeamState {
     }
 }
 
-pub struct RensaPlan {
+pub struct SkillPlan {
     rand: rand::XorShiftL,
     packs: Vec<[[u8; 2]; 2]>,
     replay: VecDeque<action::Action>
 }
 
-impl RensaPlan {
+impl SkillPlan {
     pub fn new() -> Self {
         Self {
             rand: rand::XorShiftL::new(),
@@ -53,22 +53,17 @@ impl RensaPlan {
     pub fn set_pack(&mut self, packs: Vec<[[u8; 2]; 2]>) {
         self.packs = packs;
     }
-
-    fn is_dangerous(board: &board::Board) -> bool {
-        board.max_height() as i32 >= DEAD_LINE_Y - 1
-    }
     
-    pub fn calc_rensa_plan(&mut self, cur_turn: usize, player: &player::Player) {
+    pub fn calc_skill_plan(&mut self, cur_turn: usize, player: &player::Player) {
         let mut next = Vec::new();
         let mut cur = vec![BeamState::new(player.clone(), 0, Vec::new())];
-        let fire_turn = 18;
         let beam_width = 100 * 3 * 3;
         let actions = action::Action::all_actions();
-        // let allow_dead_line = Self::is_dangerous(&player.board);
 
-        let fire_action = action::Action::PutBlock { pos: 0, rot: 0, };
-
+        let fire_action = action::Action::UseSkill;
+        let fire_turn = 10;
         let fall = self.packs[cur_turn + fire_turn].clone();
+
         for i in 0..fire_turn {
             let turn = cur_turn + i;
             let pack = self.packs[turn].clone();
@@ -86,16 +81,20 @@ impl RensaPlan {
                         return;
                     }
 
-                    // obstacleが降ってくると危ないので
-                    // if !allow_dead_line && Self::is_dangerous(&board) {
-                    //     return;
-                    // }
-
                     let mut rensa_eval_board = player.clone();
-                    // let result = rensa_eval_board.put(&fall, &fire_action);
                     let result = rensa_eval_board.put(&fall, &fire_action);
-                    // let score = -(result.obstacle * 10000 + (self.rand.next() & 0xF) as i32 - rensa_eval_board.board.max_height() as i32);
-                    let score = -(result.obstacle * 10000 + (self.rand.next() & 0xF) as i32);
+                    let skill_guage_score = if player.can_use_skill() {
+                                                100000000
+                                            } else {
+                                                player.skill_guage * 10000
+                                            };
+                    let score = -(
+                                    // maximize
+                                    result.obstacle * 1000
+                                    + skill_guage_score
+                                    - player.board.max_height() as i32 * 10
+                                    + (self.rand.next() & 0xF) as i32
+                                );
                     let mut actions = b.actions.clone();
                     actions.push(a.into());
                     next.push(BeamState::new(player, score, actions));
@@ -105,6 +104,9 @@ impl RensaPlan {
             next.resize(beam_width, Default::default());
             std::mem::swap(&mut cur, &mut next);
             next.clear();
+            // if cur[0].player.can_use_skill() {
+            //     break;
+            // }
             // if cur[0].player.obstacle <= -W {
             //     break;
             // }
