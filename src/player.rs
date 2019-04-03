@@ -24,18 +24,25 @@ impl Player {
         }
         
         let result = match action {
-            action::Action::PutBlock { pos, rot } => self.board.put(pack, *pos, *rot),
-            action::Action::UseSkill => self.board.use_skill(),
+            action::Action::PutBlock { pos, rot } => {
+                let result = self.board.put(pack, *pos, *rot);
+                if result.chains > 0 {
+                    self.skill_guage += 8;
+                }
+                result
+            },
+            action::Action::UseSkill => {
+                let result = self.board.use_skill();
+                self.skill_guage = 0;
+                result
+            },
         };
         self.obstacle -= result.obstacle;
-        if result.chains > 0 {
-            self.skill_guage += 8;
-        }
         self.decrease_skill_guage += result.skill_guage;
         result
     }
 
     pub fn can_use_skill(&self) -> bool {
-        self.skill_guage >= 80
+        self.skill_guage >= 80 + 1
     }
 }
