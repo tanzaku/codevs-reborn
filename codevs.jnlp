@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <jnlp 
   spec="1.0+" 
-  codebase="https://codevs.jp/assets/files/" 
+  codebase="https://static.codevs.jp/reborn/" 
   href="codevs.jnlp">
 
   <information> 
@@ -17,7 +17,7 @@
 
   <resources> 
     <j2se version="1.8+" max-heap-size="1024m" java-vm-args="-Djava.net.preferIPv4Stack=true"/> 
-    <jar href="https://codevs.jp/assets/files/codevs.jar"/>
+    <jar href="https://static.codevs.jp/reborn/codevs.jar"/>
   </resources> 
 
   <application-desc>

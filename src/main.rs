@@ -4,6 +4,8 @@
 
 extern crate codevs_reborn_lib;
 
+// mod lambda_client;
+
 // mod action;
 // mod board;
 // mod skill_plan;
@@ -17,6 +19,11 @@ extern crate codevs_reborn_lib;
 use codevs_reborn_lib::rensa_ai;
 
 fn main() {
+    // if true {
+    //     lambda_client::test();
+    //     return;
+    // }
+
     let stdin = std::io::stdin();
     let lock = stdin.lock();
     let mut ai = rensa_ai::RensaAi::new(lock);
