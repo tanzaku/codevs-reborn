@@ -17,6 +17,7 @@ extern crate codevs_reborn_lib;
 // mod player;
 
 use codevs_reborn_lib::rensa_ai;
+use codevs_reborn_lib::best_ai;
 
 fn main() {
     // if true {
@@ -26,7 +27,8 @@ fn main() {
 
     let stdin = std::io::stdin();
     let lock = stdin.lock();
-    let mut ai = rensa_ai::RensaAi::new(lock);
-    // let mut ai = skill_ai::RensaAi::new(lock);
+    // let mut ai = rensa_ai::RensaAi::new(lock);
+    // let mut ai = skill_ai::SkillAi::new(lock);
+    let mut ai = best_ai::BestAi::new(lock);
     ai.exec();
 }

@@ -12,6 +12,23 @@
 * `cargo build`
 
 
+# test ai
+* cp target/release/test-ai ./ai/rensa_ai_v0.1
+* /Users/user/work/src/codevs-reborn/ai/rensa_ai_v0.1
+* /Users/user/work/src/codevs-reborn/ai/best_ai_v0.3_fixed
+* /Users/user/work/src/codevs-reborn/ai/best_ai_v0.4
+* /Users/user/work/src/codevs-reborn/ai/best_ai_v0.7
+* /Users/user/work/src/codevs-reborn/ai/best_ai_v0.8
+* /Users/user/work/src/codevs-reborn/ai/best_ai_v0.8-40
+* /Users/user/work/src/codevs-reborn/target/release/test-ai
+* /Users/user/work/src/codevs-reborn/ai/test-ai-wip
+
+RUSTFLAGS='-C overflow-checks=n' cargo run
+
+* pass instance: mHfapR8gvBarpinnrg
+
+* cp /Users/user/work/src/codevs-reborn/target/release/test-ai /Users/user/work/src/codevs-reborn/ai/test-ai-wip
+
 # libraryを分離して、AIとLambdaはライブラリに依存するようにする
 * 4bit
 
@@ -70,16 +87,26 @@ cargo clean
 RUSTFLAGS='-C target-feature=+sse,+sse2,+sse3,+sse3,+sse4.1,+sse4.2,+avx,+avx2,+fma -C target-cpu=skylake' CROSS_COMPILE=x86_64-linux-musl- cargo build --release --target=x86_64-unknown-linux-musl
 ok
 
-RUSTFLAGS='-C target-feature=+sse,+sse2,+sse3,+sse3,+sse4.1,+sse4.2,+avx,+avx2,+fma -C target-cpu=skylake' CROSS_COMPILE=x86_64-linux-musl- cross build --release --target=x86_64-unknown-linux-musl
+# RUSTFLAGS='-C target-feature=+sse,+sse2,+sse3,+sse3,+sse4.1,+sse4.2,+avx,+avx2,+fma -C target-cpu=skylake' CROSS_COMPILE=x86_64-linux-musl- cross build --release --target=x86_64-unknown-linux-musl
 
 
 target cpu
 https://github.com/llvm-mirror/clang/blob/master/test/Frontend/x86-target-cpu.c
 
 
-cp ./target/x86_64-unknown-linux-gnu/release/test-ai ./test-ai
+
+### save new ver
+cargo clean && cargo build --release
+cp ./target/release/test-ai ./ai/best_ai_v0.8
+cp ./target/release/test-ai ./ai/best_ai_v0.8-40
+
+### make submit ai
+RUSTFLAGS='-C target-feature=+sse,+sse2,+sse3,+sse3,+sse4.1,+sse4.2,+avx,+avx2,+fma -C target-cpu=skylake' CROSS_COMPILE=x86_64-linux-musl- cargo build --release --target=x86_64-unknown-linux-musl
+# cp ./target/x86_64-unknown-linux-gnu/release/test-ai ./test-ai
 cp ./target/x86_64-unknown-linux-musl/release/test-ai ./test-ai
+cp /Users/user/work/src/codevs-reborn/ai/best_ai_v0.3_fixed ./test-ai
 rm codevs-reborn.zip & zip codevs-reborn test-ai run.sh
+
 ```
 
 
