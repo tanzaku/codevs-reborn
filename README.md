@@ -19,6 +19,7 @@
 * /Users/user/work/src/codevs-reborn/ai/best_ai_v0.4
 * /Users/user/work/src/codevs-reborn/ai/best_ai_v0.7
 * /Users/user/work/src/codevs-reborn/ai/best_ai_v0.8
+* /Users/user/work/src/codevs-reborn/ai/best_ai_v0.9
 * /Users/user/work/src/codevs-reborn/ai/best_ai_v0.8-40
 * /Users/user/work/src/codevs-reborn/target/release/test-ai
 * /Users/user/work/src/codevs-reborn/ai/test-ai-wip
@@ -98,13 +99,12 @@ https://github.com/llvm-mirror/clang/blob/master/test/Frontend/x86-target-cpu.c
 ### save new ver
 cargo clean && cargo build --release
 cp ./target/release/test-ai ./ai/best_ai_v0.8
-cp ./target/release/test-ai ./ai/best_ai_v0.8-40
+cp ./target/release/test-ai ./ai/best_ai_v0.10.0
 
 ### make submit ai
 RUSTFLAGS='-C target-feature=+sse,+sse2,+sse3,+sse3,+sse4.1,+sse4.2,+avx,+avx2,+fma -C target-cpu=skylake' CROSS_COMPILE=x86_64-linux-musl- cargo build --release --target=x86_64-unknown-linux-musl
 # cp ./target/x86_64-unknown-linux-gnu/release/test-ai ./test-ai
 cp ./target/x86_64-unknown-linux-musl/release/test-ai ./test-ai
-cp /Users/user/work/src/codevs-reborn/ai/best_ai_v0.3_fixed ./test-ai
 rm codevs-reborn.zip & zip codevs-reborn test-ai run.sh
 
 ```
