@@ -21,11 +21,11 @@ fn main() {
 fn rensa_test() {
     let res: Vec<_> = (1..101).into_par_iter().map(|i| {
         let filename = format!("in/in_{}.txt", i);
-        let file = File::open(filename).expect("ok");
+        let file = File::open(filename.clone()).expect("ok");
         let reader = BufReader::new(file);
         let mut ai = best_ai::BestAi::new(reader);
         let chains = ai.rensa_search_test();
-        eprintln!("chains: {:?}", chains);
+        eprintln!("chains: {} {:?}", filename, chains);
         chains
     }).collect();
 
