@@ -1,6 +1,12 @@
 
 extern crate codevs_reborn_lib;
 
+
+use std::fs::File;
+use std::io::BufReader;
+
+use rayon::prelude::*;
+
 use codevs_reborn_lib::best_ai;
 
 fn main() {
@@ -8,4 +14,18 @@ fn main() {
     let lock = stdin.lock();
     let mut ai = best_ai::BestAi::new(lock);
     ai.exec();
+}
+
+
+#[test]
+fn rensa_test() {
+    let res: Vec<_> = (1..101).into_par_iter().map(|i| {
+        let filename = format!("in/in_{}.txt", i);
+        let file = File::open(filename).expect("ok");
+        let reader = BufReader::new(file);
+        let mut ai = best_ai::BestAi::new(reader);
+        let chains = ai.rensa_search_test();
+        eprintln!("chains: {:?}", chains);
+        chains
+    }).collect();
 }

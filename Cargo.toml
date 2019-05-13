@@ -8,3 +8,6 @@ edition = "2018"
 
 [dependencies.codevs_reborn_lib]
 path = "../codevs-reborn-lib"
+
+[dev-dependencies]
+rayon = "1.0"
