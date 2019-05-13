@@ -28,4 +28,15 @@ fn rensa_test() {
         eprintln!("chains: {:?}", chains);
         chains
     }).collect();
+
+    let mut cnt = vec![vec![0; 20]; 13];
+    res.into_iter().for_each(|r| {
+        r.into_iter().enumerate().for_each(|(i,c)| {
+            cnt[i][c as usize] += 1;
+        });
+    });
+
+    cnt.into_iter().for_each(|c| {
+        eprintln!("{}", c.into_iter().map(|i| i.to_string()).collect::<Vec<_>>().join(","));
+    });
 }
