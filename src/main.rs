@@ -5,7 +5,6 @@ extern crate codevs_reborn_lib;
 use std::fs::File;
 use std::io::BufReader;
 
-use rayon::prelude::*;
 
 use codevs_reborn_lib::best_ai;
 
@@ -20,6 +19,7 @@ fn main() {
 #[test]
 #[ignore]
 fn rensa_test79() {
+    use rayon::prelude::*;
     let filename = format!("in/in_79.txt");
     let file = File::open(filename.clone()).expect("ok");
     let reader = BufReader::new(file);
@@ -31,6 +31,7 @@ fn rensa_test79() {
 #[test]
 #[ignore]
 fn rensa_test76() {
+    use rayon::prelude::*;
     let filename = format!("in/in_76.txt");
     let file = File::open(filename.clone()).expect("ok");
     let reader = BufReader::new(file);
@@ -41,6 +42,7 @@ fn rensa_test76() {
 
 #[test]
 fn rensa_test() {
+    use rayon::prelude::*;
     let res: Vec<_> = (1..101).into_par_iter().map(|i| {
         let filename = format!("in/in_{}.txt", i);
         let file = File::open(filename.clone()).expect("ok");
