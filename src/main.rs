@@ -47,7 +47,7 @@ fn rensa_test76() {
 #[test]
 fn rensa_test() {
     use rayon::prelude::*;
-    let res: Vec<_> = (1..101).into_par_iter().map(|i| {
+    let res: Vec<_> = (1..201).into_par_iter().map(|i| {
         let filename = format!("in/in_{}.txt", i);
         let file = File::open(filename.clone()).expect("ok");
         let reader = BufReader::new(file);
