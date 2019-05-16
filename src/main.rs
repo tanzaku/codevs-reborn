@@ -2,10 +2,7 @@
 extern crate codevs_reborn_lib;
 
 
-#[test]
 use std::fs::File;
-
-#[test]
 use std::io::BufReader;
 
 
