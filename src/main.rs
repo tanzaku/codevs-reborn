@@ -82,7 +82,7 @@ fn rensa_test_best() {
 
     let mut cnt = vec![vec![0; 20]; 13];
     res.into_iter().for_each(|r| {
-        cnt[r.len() - 1][r.get_chains() as usize] += 1;
+        cnt[std::cmp::max(1, r.len()) - 1][r.get_chains() as usize] += 1;
     });
 
     cnt.into_iter().for_each(|c| {
